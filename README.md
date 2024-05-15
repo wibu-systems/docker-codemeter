@@ -1,6 +1,6 @@
 # About this repo
 
-This is the Git repo of the offical CodeMeter Docker Images available on [wibusystemska/codemeter](https://hub.docker.com/repository/docker/wibusystemska/codemeter).
+This is the Git repo of the offical CodeMeter Docker Images available on [wibusystems/codemeter](https://hub.docker.com/repository/docker/wibusystems/codemeter).
 See the [User Doc](wibu-systems/docker-codemeter/blob/main/docs/UserDoc.md) for details on both usecase as well as how to use the images.
 
 
