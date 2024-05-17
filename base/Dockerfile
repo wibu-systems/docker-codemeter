@@ -1,18 +1,20 @@
 #escape=`
-FROM debian:stable-slim AS prepare
 
+FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
+
+ARG TARGETARCH
 ARG CODEMETER_VERSION=8.10.6221.500
-ADD codemeter-lite_${CODEMETER_VERSION}_amd64.deb /cmlite.deb
+ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
-  dpkg-deb -xv /cmlite.deb /codemeter; `
-  mkdir libusb && cd libusb; `
-  apt update; `
-  apt download libusb-1.0-0; `
-  dpkg-deb -xv libusb-1.0-0* /libusb_dir;
+    dpkg-deb -xv /cmlite.deb /codemeter; `
+    mkdir libusb && cd libusb; `
+    apt update; `
+    apt download libusb-1.0-0; `
+    dpkg-deb -xv libusb-1.0-0* /libusb_dir;
 
-FROM debian:stable-slim
-
+FROM --platform=linux/$TARGETARCH debian:stable-slim
+ARG TARGETARCH
 ARG CODEMETER_VERSION=8.10.6221.500
 LABEL `
     org.opencontainers.image.url="https://github.com/wibu-systems/docker-codemeter" `
@@ -31,8 +33,8 @@ ENV DEBIAN_FRONTEND=noninteractive `
     LANGUAGE='en_US:en' `
     LC_ALL='en_US.UTF-8'
 
-# CodeMeter's default Communication port
-EXPOSE 22350
+# CodeMeter's default Communication port 
+EXPOSE 22350 
 
 # For CmWAN Communication this port is used
 EXPOSE 22351
@@ -40,8 +42,8 @@ EXPOSE 22351
 COPY --from=prepare /codemeter/usr/bin/codemeter-info /usr/bin/codemeter-info
 COPY --from=prepare /codemeter/usr/bin/cmu /usr/bin/cmu
 COPY --from=prepare /codemeter/usr/sbin/CodeMeterLin /usr/sbin/CodeMeterLin
-COPY --from=prepare /codemeter/usr/lib/x86_64-linux-gnu/libwibucm.so /usr/lib/x86_64-linux-gnu/libwibucm.so
-COPY --from=prepare /libusb_dir/usr/lib/x86_64-linux-gnu/libusb* /usr/lib/x86_64-linux-gnu/.
+COPY --from=prepare /codemeter/usr/lib/*-linux-gnu/libwibucm.so /usr/lib/libwibucm.so
+COPY --from=prepare /libusb_dir/usr/lib/*-linux-gnu/libusb* /usr/lib/.
 COPY --from=prepare /codemeter/usr/share/doc/CodeMeter/OpenSource_en.pdf /usr/share/doc/CodeMeter/OpenSource_en.pdf
 
 # declare volume first
@@ -53,6 +55,8 @@ ADD Server.ini /etc/wibu/CodeMeter/Server.ini
 
 RUN apt update ; `
     apt install -y locales ; `
+    mv /usr/lib/libwibucm.so /usr/lib/$(uname -m)-linux-gnu/. ; `
+    mv /usr/lib/libusb* /usr/lib/$(uname -m)-linux-gnu/. ; `
     rm -rf /var/lib/apt/lists/* ; `
     # Create CodeMeter's Directory Structure; this command will always exit with  a non-zero exit code
     /usr/sbin/CodeMeterLin -x || true ; `
