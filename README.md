@@ -10,7 +10,7 @@ This image provides the CodeMeter Runtime used for Licensing containerized Appli
 
 This image contains the CodeMeter Runtime for mutliple use cases. Those usecases include, `NetworkServer`, `NetworkClient` and `CmCloud` licenses.
 
-Please refere to our offcial Documentation on [github](https://github.com/wibu-system/docker-codemeter) for further information.
+Please refer to our offcial Documentation on [github](https://github.com/wibu-system/docker-codemeter) for further information.
 
 ## Configure CodeMeter Runtime
 
@@ -20,7 +20,7 @@ Please refere to our offcial Documentation on [github](https://github.com/wibu-s
 | --------------------- | ------------------------- | ------------------------------------------------------------- |
 | `CM_NETWORK_SERVER`   | [on,off] (default: off)   | Start CodeMeter in container as Networkserver                 |
 | `CM_REMOTE_SERVER`    | IP-Address or Hostname    | Add the given Address to the Server Search List               |
-| `CM_LICENSE_FILE`     | /path/to/license/file     | Import the given License File into the CodeMeter Subsystem    |
+| `CM_LICENSE_FILE`     | /path/to/license/file     | Import the given License File(s) into the CodeMeter Subsystem |
 | `CM_LOG_BOOTSTRAP`    | [on,off] (default: off)   | Enable eventlogging for during bootstrap step                 |
 
 ### Via Server.ini
@@ -44,4 +44,4 @@ Those exit codes are usually preceeded by a meaningfull error message.
 
 For support questions ("How do I?", "I got this error, why?", ...), please first read the [Documentation](https://www.wibu.com/support/manuals-guides.html) before heading to our customer support.  
 
-Please refere to `BUILDING.md` before trying to build any of the images.
+Please refer to `BUILDING.md` before trying to build any of the images.
