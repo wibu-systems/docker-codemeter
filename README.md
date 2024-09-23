@@ -20,7 +20,7 @@ Please refer to our offcial Documentation on [github](https://github.com/wibu-sy
 | --------------------- | ------------------------- | ------------------------------------------------------------- |
 | `CM_NETWORK_SERVER`   | [on,off] (default: off)   | Start CodeMeter in container as Networkserver                 |
 | `CM_REMOTE_SERVER`    | IP-Address or Hostname    | Add the given Address to the Server Search List               |
-| `CM_LICENSE_FILE`     | /path/to/license/file     | Import the given License File(s) into the CodeMeter Subsystem |
+| `CM_LICENSE_FILE`     | /path/to/license/file     | Import the given License File(s) into the CodeMeter Subsystem. Multiple files must be separated with a colon |
 | `CM_LOG_BOOTSTRAP`    | [on,off] (default: off)   | Enable eventlogging for during bootstrap step                 |
 
 ### Via Server.ini
