@@ -3,7 +3,7 @@
 FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
 
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.10.6221.500
+ARG CODEMETER_VERSION=8.20.6539.500
 ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
@@ -33,8 +33,8 @@ ENV DEBIAN_FRONTEND=noninteractive `
     LANGUAGE='en_US:en' `
     LC_ALL='en_US.UTF-8'
 
-# CodeMeter's default Communication port 
-EXPOSE 22350 
+# CodeMeter's default Communication port
+EXPOSE 22350
 
 # For CmWAN Communication this port is used
 EXPOSE 22351
@@ -55,19 +55,16 @@ ADD Server.ini /etc/wibu/CodeMeter/Server.ini
 
 RUN apt update ; `
     apt install -y locales ; `
-    mv /usr/lib/libwibucm.so /usr/lib/$(uname -m)-linux-gnu/. ; `
-    mv /usr/lib/libusb* /usr/lib/$(uname -m)-linux-gnu/. ; `
     rm -rf /var/lib/apt/lists/* ; `
-    # Create CodeMeter's Directory Structure; this command will always exit with  a non-zero exit code
-    /usr/sbin/CodeMeterLin -x || true ; `
     # since we don't have the installer this needs to be created manually
-    mkdir -p /var/lib/CodeMeter/CmCloud/ ; `
-    sed -i '/en_US.UTF-8/s/^# //g' /etc/locale.gen ; `
-    locale-gen
+    mkdir -p /var/lib/CodeMeter/CmAct; `
+    mkdir -p /var/lib/CodeMeter/CmCloud ; `
+    localedef -i en_US -c -f UTF-8 -A /usr/share/locale/locale.alias en_US.UTF-8
+
 
 # Ensure a safe shutdown of the CodeMeter Service
 STOPSIGNAL SIGINT
 
 HEALTHCHECK --start-period=8s --interval=1m --start-interval=2s CMD /healthcheck.sh
 
-ENTRYPOINT [ "/entrypoint.sh"]
+ENTRYPOINT [ "/entrypoint.sh" ]
