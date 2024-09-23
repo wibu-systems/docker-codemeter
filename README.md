@@ -33,12 +33,12 @@ CodeMeter will load this configuration during startup only.
 The entrypoint script defines dedicated exit codes, depending on the failure reason.
 Those exit codes are usually preceeded by a meaningfull error message.
 
-| Exit Code | Meaning                                                           |
-| --------- | ----------------------------------------------------------------- |
-| 0         | CodeMeter terminated gracefully.                                  |
-| 1         | CodeMeter terminated with an error.                               |
-| 16        | A file was specified for import during bootstrap but was missing  |
-| 17        | During bootstrap the import of a file failed - check the evenlog  |
+| Exit Code | Meaning                                                            |
+| --------- | ------------------------------------------------------------------ |
+| 0         | CodeMeter terminated gracefully.                                   |
+| 1         | CodeMeter terminated with an error.                                |
+| 16        | A file was specified for import during bootstrap but was missing   |
+| 17        | During bootstrap the import of a file failed - check the eventlog  |
 
 ## Have Questions or Feedback?
 
