@@ -42,6 +42,6 @@ Those exit codes are usually preceeded by a meaningfull error message.
 
 ## Have Questions or Feedback?
 
-For support questions ("How do I?", "I got this error, why?", ...), please first read the [Documentation](wibu-systems/docker-codemeter/blob/main/docs/CodeMeterAndDocker.md) and the [User Doc](wibu-systems/docker-codemeter/blob/main/docs/UserDoc.md) before heading to our customer support.  
+For support questions ("How do I?", "I got this error, why?", ...), please first read the [Documentation](https://www.wibu.com/support/manuals-guides.html) before heading to our customer support.  
 
 Please refere to `BUILDING.md` before trying to build any of the images.
