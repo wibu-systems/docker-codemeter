@@ -3,7 +3,7 @@
 FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
 
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.20.6539.500
+ARG CODEMETER_VERSION=8.20.6558.501
 ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
