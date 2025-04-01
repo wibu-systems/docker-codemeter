@@ -3,19 +3,15 @@
 FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
 
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.20.6539.500
+ARG CODEMETER_VERSION=8.30.6879.500
 ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
-    dpkg-deb -xv /cmlite.deb /codemeter; `
-    mkdir libusb && cd libusb; `
-    apt update; `
-    apt download libusb-1.0-0; `
-    dpkg-deb -xv libusb-1.0-0* /libusb_dir;
+    dpkg-deb -xv /cmlite.deb /codemeter; 
 
 FROM --platform=linux/$TARGETARCH debian:stable-slim
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.10.6221.500
+ARG CODEMETER_VERSION=8.30.6879.500
 LABEL `
     org.opencontainers.image.url="https://github.com/wibu-systems/docker-codemeter" `
     org.opencontainers.image.documentation="https://github.com/wibu-systems/docker-codemeter" `
@@ -43,8 +39,8 @@ COPY --from=prepare /codemeter/usr/bin/codemeter-info /usr/bin/codemeter-info
 COPY --from=prepare /codemeter/usr/bin/cmu /usr/bin/cmu
 COPY --from=prepare /codemeter/usr/sbin/CodeMeterLin /usr/sbin/CodeMeterLin
 COPY --from=prepare /codemeter/usr/lib/*-linux-gnu/libwibucm.so /usr/lib/libwibucm.so
-COPY --from=prepare /libusb_dir/usr/lib/*-linux-gnu/libusb* /usr/lib/.
 COPY --from=prepare /codemeter/usr/share/doc/CodeMeter/OpenSource_en.pdf /usr/share/doc/CodeMeter/OpenSource_en.pdf
+COPY --from=prepare /codemeter/usr/lib/*-linux-gnu/libcpsrtcm.so /usr/lib/libcpsrtcm.so
 
 # declare volume first
 VOLUME [ "/etc/wibu/CodeMeter" ]
