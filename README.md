@@ -8,7 +8,7 @@ This image provides the CodeMeter Runtime used for Licensing containerized Appli
 
 ### About the image content
 
-This image contains the CodeMeter Runtime for multiple use cases. Those use-cases include, `NetworkServer`, `NetworkClient` and `CmCloud` licenses.
+This image contains the CodeMeter Runtime for multiple use cases. Those use cases include, `NetworkServer`, `NetworkClient` and `CmCloud` licenses.
 
 Please refer to our official Documentation on [github](https://github.com/wibu-systems/docker-codemeter) for further information.
 
