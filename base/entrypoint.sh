@@ -4,14 +4,16 @@
 #
 # Behaviour can be changed by using the following environment variables
 # CM_NETWORK_SERVER -> start CodeMeterLin with network server capabilities
-# CM_REMOTE_SERVER  -> Add a given remote server to
+# CM_REMOTE_SERVER  -> Add a given remote server to the Server Search List. Multiple entries may be given by separating them with a ','
 # CM_LICENSE_FILE   -> Import the given License File(s) at startup of the Container. 
-# CM_LOG_BOOTSTRAP   -> Enable Logging to stdout when bootstrapping
+# CM_LOG_BOOTSTRAP  -> Enable Logging to stdout when bootstrapping
+# CM_USE_BROADCAST_REMOTE_SERVERS   -> Enable Server Search via UPD-Broadcast
 
 CM_ALWAYS_IMPORT=${CM_ALWAYS_IMPORT:-off}
 CM_NETWORK_SERVER=${CM_NETWORK_SERVER:-off}
 
 CM_LOG_BOOTSTRAP=${CM_LOG_BOOTSTRAP:-off}
+CM_USE_BROADCAST_REMOTE_SERVERS=${CM_USE_BROADCAST_REMOTE_SERVERS:-on}
 
 # Exit Codes
 EXIT_IMPORT_FAILED=17
@@ -42,21 +44,42 @@ networkServer='-'
 
 touch "${HOME}/.cm_init_lock"
 
+# Enable network server if needed
 if [[ "${CM_NETWORK_SERVER,,}" == "on" ]];
 then
   networkServer='+'
 fi
 
-if [ -n "${CM_REMOTE_SERVER}" ];
+# Remove broadcast entry from server search list
+if [[ "${CM_USE_BROADCAST_REMOTE_SERVERS,,}" == "off" ]];
 then
-  if ! cmu --list-server | grep -q "${CM_REMOTE_SERVER}" ;
+  start_cm_if_needed
+  if ! cmu --list-server | grep -q '255.255.255.255';
   then
-    start_cm_if_needed
-    cmu --add-server "${CM_REMOTE_SERVER}"
+    cmu --delete-server "255.255.255.255"
   fi
 fi
 
+# Handle Server search list entries
+if [ -n "${CM_REMOTE_SERVER}" ];
+then
 
+  # store IFS so we can restore it later
+  old_IFS=$IFS
+  IFS=","
+  for entry in $CM_REMOTE_SERVER;
+  do
+    if ! cmu --list-server | grep -q "${entry}" ;
+    then
+      start_cm_if_needed
+      cmu --add-server "${entry}"
+    fi
+  done
+  IFS=${old_IFS}
+fi
+
+
+# Handle license file import
 if [ -n "${CM_LICENSE_FILE}" ];
 then
   # check if sufficient containers are already imported
@@ -68,7 +91,7 @@ then
   # store IFS so we can restore it later
   old_IFS=$IFS
   IFS=","
-  
+
   # Check if the expected amount of CmContainer(s) has already been imported
   if cmu -l | grep -q "${import_count} CmContainer" ;
   then
