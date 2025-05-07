@@ -20,7 +20,7 @@ EXIT_IMPORT_FAILED=17
 EXIT_IMPORT_FILE_MISSING=16
 
 start_cm_if_needed(){
-  if [ ! -f /run/lock/cm_lock ];
+  if cmu -l | grep -q 'not running';
   then
     echo "[+] Begin bootstrapping CodeMeter Runtime "
     
@@ -37,6 +37,11 @@ start_cm_if_needed(){
     do
       sleep 0.5
     done
+  else
+    if [[ "${CM_LOG_BOOTSTRAP,,}" == "on" ]];
+    then
+      echo "[~] CodeMeter is already running"
+    fi
   fi
 }
 
@@ -116,7 +121,7 @@ then
   IFS=${old_IFS}
 fi
 
-# Terminate the running CodeMeter Instance used for boostrapping
+# Terminate the running CodeMeter Instance used for bootstrapping
 if test -f /run/lock/cm_lock ;
 then
    kill -SIGTERM %1
