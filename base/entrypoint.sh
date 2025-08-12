@@ -9,15 +9,16 @@
 # CM_LOG_BOOTSTRAP  -> Enable Logging to stdout when bootstrapping
 # CM_USE_BROADCAST_REMOTE_SERVERS   -> Enable Server Search via UPD-Broadcast
 
-CM_ALWAYS_IMPORT=${CM_ALWAYS_IMPORT:-off}
-CM_NETWORK_SERVER=${CM_NETWORK_SERVER:-off}
-
-CM_LOG_BOOTSTRAP=${CM_LOG_BOOTSTRAP:-off}
-CM_USE_BROADCAST_REMOTE_SERVERS=${CM_USE_BROADCAST_REMOTE_SERVERS:-on}
+# CM_CMCLOUD_CREDENTIALS -> Import the given CmCloud-Credential file(s). This Option is not compatible with CM_LICENSE_FILE, CM_REMOTE_SERVER and CM_USE_BROADCAST_REMOTE_SERVERS.
 
 # Exit Codes
 EXIT_IMPORT_FAILED=17
 EXIT_IMPORT_FILE_MISSING=16
+EXIT_INVALID_OPTION_COMBINATION=15
+
+CM_NETWORK_SERVER=${CM_NETWORK_SERVER:-off}
+
+CM_LOG_BOOTSTRAP=${CM_LOG_BOOTSTRAP:-off}
 
 start_cm_if_needed(){
   if cmu -l | grep -q 'not running';
@@ -45,15 +46,54 @@ start_cm_if_needed(){
   fi
 }
 
-networkServer='-'
-
 touch "${HOME}/.cm_init_lock"
+networkServer='-'
 
 # Enable network server if needed
 if [[ "${CM_NETWORK_SERVER,,}" == "on" ]];
 then
   networkServer='+'
 fi
+
+set +x
+CODEMETER_CMD=('/usr/sbin/CodeMeterLin' "-v" "-n${networkServer}")
+
+if [ -n "${CM_CMCLOUD_CREDENTIALS}" ];
+then
+  # Sanity check argument combination
+  if [ -n "${CM_REMOTE_SERVER}" ] || [ -n "${CM_LICENSE_FILE}" ] || [  -n "${CM_USE_BROADCAST_REMOTE_SERVERS}" ]
+  then
+    echo "Invalid combination of startup options given."
+    echo "The Options 'CM_CMCLOUD_CREDENTIALS' is not compatible with CM_LICENSE_FILE, CM_REMOTE_SERVER and CM_USE_BROADCAST_REMOTE_SERVERS."
+    exit $EXIT_INVALID_OPTION_COMBINATION
+  fi
+
+  # Expand the CMD Array for all files, given in `CM_CMCLOUD_CREDENTIALS`
+  old_IFS=$IFS
+  IFS=","
+  for importee in $CM_CMCLOUD_CREDENTIALS;
+  do
+    if [ ! -f "${importee}" ];
+    then
+      echo "Cannot import file '${importee}'. File is missing or cannot be read."
+      exit $EXIT_IMPORT_FILE_MISSING
+    fi
+    CODEMETER_CMD+=("-f:${importee}")
+  done
+  IFS=$old_IFS
+  if [[ "${CM_LOG_BOOTSTRAP,,}" == "on" ]];
+  then
+    echo "[~] Starting CodeMeter with command: "
+    echo "${CODEMETER_CMD[@]}"
+  fi
+  # expand the array & replace this process with CodeMeter
+  rm "${HOME}/.cm_init_lock"
+  set -- "${CODEMETER_CMD[@]}" "$@"
+  exec "$@"
+fi
+
+# must be set later
+CM_USE_BROADCAST_REMOTE_SERVERS=${CM_USE_BROADCAST_REMOTE_SERVERS:-on}
 
 # Remove broadcast entry from server search list
 if [[ "${CM_USE_BROADCAST_REMOTE_SERVERS,,}" == "off" ]];
@@ -131,7 +171,6 @@ fi
 
 rm -f "${HOME}/.cm_init_lock"
 
-DEFAULT_CM_CMD=('/usr/sbin/CodeMeterLin' "-v" "-n${networkServer}")
-set -- "${DEFAULT_CM_CMD[@]}" "$@"
+set -- "${CODEMETER_CMD[@]}" "$@"
 ## replace the current bash process with CodeMeterLin proc
 exec "$@"

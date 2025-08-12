@@ -3,7 +3,7 @@
 FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
 
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.30.6885.501
+ARG CODEMETER_VERSION=8.40.7109.500
 ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
@@ -11,7 +11,9 @@ RUN set -eux; `
 
 FROM --platform=linux/$TARGETARCH debian:stable-slim
 ARG TARGETARCH
-ARG CODEMETER_VERSION=8.30.6885.501
+ARG CODEMETER_VERSION=8.40.7109.500
+ARG CM_IMAGE_VERSION=1.2.0
+
 LABEL `
     org.opencontainers.image.url="https://github.com/wibu-systems/docker-codemeter" `
     org.opencontainers.image.documentation="https://github.com/wibu-systems/docker-codemeter" `
@@ -22,6 +24,7 @@ LABEL `
     org.opencontainers.image.title="CodeMeter RunTime Base Image"`
     org.opencontainers.image.description="Contains all required components to use CodeMeter RunTime within a Dockerized environment"`
     com.wibu.version=${CODEMETER_VERSION}`
+    com.wibu.image.version=${CM_IMAGE_VERSION}`
     com.wibu.opensource.path="/usr/share/doc/CodeMeter/OpenSource_en.pdf"
 
 ENV DEBIAN_FRONTEND=noninteractive `
