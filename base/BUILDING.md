@@ -22,7 +22,7 @@ docker build -t wibusystems/codemeter --no-cache -f Dockerfile .
 ### Additonal Build Parameters
 
 When cross building images for another architecture, the additonal `platform` parameter may be passed when building. Currently only amd64 and arm64 CPU Architectures are being tested.
-Please refere to the [Docker Docs](https://docs.docker.com/build/building/multi-platform/) for more details about multiplatform images and builds.
+Please refer to the [Docker Docs](https://docs.docker.com/build/building/multi-platform/) for more details about multiplatform images and builds.
 
 Example:
 
