@@ -41,9 +41,9 @@ EXPOSE 22351
 COPY --from=prepare /codemeter/usr/bin/codemeter-info /usr/bin/codemeter-info
 COPY --from=prepare /codemeter/usr/bin/cmu /usr/bin/cmu
 COPY --from=prepare /codemeter/usr/sbin/CodeMeterLin /usr/sbin/CodeMeterLin
-COPY --from=prepare /codemeter/usr/lib/*-linux-gnu/libwibucm.so /usr/lib/libwibucm.so
+COPY --from=prepare /codemeter/usr/lib/*-linux-gnu*/libwibucm.so /usr/lib/libwibucm.so
 COPY --from=prepare /codemeter/usr/share/doc/CodeMeter/OpenSource_en.pdf /usr/share/doc/CodeMeter/OpenSource_en.pdf
-COPY --from=prepare /codemeter/usr/lib/*-linux-gnu/libcpsrtcm.so /usr/lib/libcpsrtcm.so
+COPY --from=prepare /codemeter/usr/lib/*-linux-gnu*/libcpsrtcm.so /usr/lib/libcpsrtcm.so
 
 # declare volume first
 VOLUME [ "/etc/wibu/CodeMeter" ]
