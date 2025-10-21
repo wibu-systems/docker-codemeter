@@ -1,0 +1,147 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "codemeter.fullname" . }}
+  labels:
+    {{- include "codemeter.labels" . | nindent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      {{- include "codemeter.selectorLabels" . | nindent 6 }}
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      {{- with .Values.podAnnotations }}
+      annotations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      labels:
+        {{- include "codemeter.labels" . | nindent 8 }}
+        {{- with .Values.podLabels }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.podSecurityContext }}
+      securityContext:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      initContainers:
+        - name: init-config
+          image: docker.io/library/busybox:1.36.1
+          command:
+            - /bin/sh
+            - -c
+          args:
+            - cp /config/Server.ini /data/Server.ini
+          volumeMounts:
+            - name: server-ini-src
+              mountPath: /config
+            - name: server-ini
+              mountPath: /data
+      containers:
+        - name: {{ .Chart.Name }}
+          {{- with .Values.securityContext }}
+          securityContext:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy }}
+          env:
+            {{- with .Values.config.logBootstrap }}
+            - name: CM_LOG_BOOTSTRAP
+              value: {{ quote (ternary "on" "off" .) }}
+            {{- end }}
+            {{- with .Values.config.networkServer }}
+            - name: CM_NETWORK_SERVER
+              value: {{ quote (ternary "on" "off" .) }}
+            {{- end }}
+            {{- with .Values.config.useBroadcastRemoteServers }}
+            - name: CM_USE_BROADCAST_REMOTE_SERVERS
+              value: {{ quote (ternary "on" "off" .) }}
+            {{- end }}
+            {{- with .Values.config.remoteServer }}
+            - name: CM_REMOTE_SERVER
+              value: {{ quote (join "," .) }}
+            {{- end }}
+            {{- if .Values.config.licenseFile }}
+            {{- include "codemeter.cmLicenseFileEnv" . | indent 12 }}
+            {{- end }}
+            {{- if .Values.config.cmCloudCredentials }}
+            {{- include "codemeter.cmCloudLicenseFileEnv" . | indent 12 }}
+            {{- end }}
+            {{- with .Values.env }}
+            {{- toYaml . | nindent 12}}
+            {{- end }}
+          {{- with .Values.envFrom }}
+          envFrom:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          ports:
+            - name: codemeter
+              containerPort: {{ .Values.service.port }}
+              protocol: TCP
+          {{- with .Values.livenessProbe }}
+          livenessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.readinessProbe }}
+          readinessProbe:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with .Values.resources }}
+          resources:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumeMounts:
+            - name: server-ini
+              mountPath: /etc/wibu/CodeMeter/Server.ini
+              subPath: Server.ini
+            {{- with .Values.config.cmFirmWbc }}
+            - name: codemeter-cmfirm-wbc
+              mountPath: /etc/wibu/CodeMeter/CmFirm.wbc
+              subPath: {{ .secretKey }}
+            {{- end }}
+            {{- with .Values.config.licenseFile }}
+            {{- include "codemeter.licenseVolumeMounts" . | indent 12 }}
+            {{- end }}
+            {{- with .Values.config.cmCloudCredentials }}
+            {{- include "codemeter.licenseVolumeMounts" . | indent 12 }}
+            {{- end }}
+            {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+      volumes:
+        - name: server-ini-src
+          configMap:
+            name: {{ include "codemeter.fullname" . }}-config
+        - name: server-ini
+          emptyDir: {}
+        {{- with .Values.config.cmFirmWbc }}
+        - name: codemeter-cmfirm-wbc
+          secret:
+            secretName: {{ .secretName }}
+        {{- end }}
+        {{- if (or .Values.config.licenseFile .Values.config.cmCloudCredentials) }}
+        {{- include "codemeter.licenseVolumes" . | indent 8 }}
+        {{- end }}
+        {{- with .Values.volumes }}
+        {{- toYaml . | nindent 8 }}
+        {{- end }}
+      {{- with .Values.nodeSelector }}
+      nodeSelector:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.affinity }}
+      affinity:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      {{- with .Values.tolerations }}
+      tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
