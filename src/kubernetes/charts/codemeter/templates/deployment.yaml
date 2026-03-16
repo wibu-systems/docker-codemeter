@@ -53,17 +53,17 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           env:
-            {{- with .Values.config.logBootstrap }}
+            {{- if not (eq .Values.config.logBootstrap nil) }}
             - name: CM_LOG_BOOTSTRAP
-              value: {{ quote (ternary "on" "off" .) }}
+              value: {{ quote (ternary "on" "off" .Values.config.logBootstrap) }}
             {{- end }}
-            {{- with .Values.config.networkServer }}
+            {{- if not (eq .Values.config.networkServer nil) }}
             - name: CM_NETWORK_SERVER
-              value: {{ quote (ternary "on" "off" .) }}
+              value: {{ quote (ternary "on" "off" .Values.config.networkServer) }}
             {{- end }}
-            {{- with .Values.config.useBroadcastRemoteServers }}
+            {{- if not (eq .Values.config.useBroadcastRemoteServers nil) }}
             - name: CM_USE_BROADCAST_REMOTE_SERVERS
-              value: {{ quote (ternary "on" "off" .) }}
+              value: {{ quote (ternary "on" "off" .Values.config.useBroadcastRemoteServers) }}
             {{- end }}
             {{- with .Values.config.remoteServer }}
             - name: CM_REMOTE_SERVER
