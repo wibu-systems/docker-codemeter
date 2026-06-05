@@ -1,2 +1,5 @@
 # Ensure all scripts have LF
 *.sh  eol=lf
+
+# Dockerfile with here-docs must use lf
+Dockerfile eol=lf

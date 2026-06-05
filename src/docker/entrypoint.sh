@@ -24,16 +24,16 @@ start_cm_if_needed(){
   if cmu -l | grep -q 'not running';
   then
     echo "[+] Begin bootstrapping CodeMeter Runtime "
-    
-    CM_BOOTSTRAP_MODE=f
+
     if [[ "${CM_LOG_BOOTSTRAP,,}" == "on" ]];
     then
-      CM_BOOTSTRAP_MODE=v
+      gosu codemeter-backend-classic /usr/sbin/CodeMeterLin -v &
+    else
+      # Since we don't have the silent fork mode anymore, push it all to /dev/null
+      gosu codemeter-backend-classic /usr/sbin/CodeMeterLin -v &>/dev/null &
     fi
 
-    /usr/sbin/CodeMeterLin -${CM_BOOTSTRAP_MODE} &
-    # We don't have Systemd's notify ability here, so just sleep
-    
+    # We don't have Systemd's notify ability here, so just sleep while cm is starting up
     while cmu -l | grep -q 'not running' ;
     do
       sleep 0.5
@@ -45,18 +45,21 @@ start_cm_if_needed(){
     fi
   fi
 }
+# Ensure CodeMeterLin permissions for Server.ini are okay, even with bind mounts
+chown -R codemeter-backend-classic:codemeter-backend-classic /etc/wibu/CodeMeter/ || true
 
 touch "${HOME}/.cm_init_lock"
-networkServer='-'
+
+set +x
+CODEMETER_CMD=('/usr/sbin/CodeMeterLin' "-v")
 
 # Enable network server if needed
 if [[ "${CM_NETWORK_SERVER,,}" == "on" ]];
 then
-  networkServer='+'
+  echo "Enabling CodeMeter network server via Server.ini"
+  sed -i s/IsNetworkServer=0/IsNetworkServer=1/ /etc/wibu/CodeMeter/Server.ini
 fi
 
-set +x
-CODEMETER_CMD=('/usr/sbin/CodeMeterLin' "-v" "-n${networkServer}")
 
 if [ -n "${CM_CMCLOUD_CREDENTIALS}" ];
 then
@@ -99,22 +102,20 @@ CM_USE_BROADCAST_REMOTE_SERVERS=${CM_USE_BROADCAST_REMOTE_SERVERS:-on}
 if [[ "${CM_USE_BROADCAST_REMOTE_SERVERS,,}" == "off" ]];
 then
   start_cm_if_needed
-  if ! cmu --list-server | grep -q '255.255.255.255';
+  if cmu --show-serversearchlist | grep -q '255.255.255.255';
   then
     cmu --delete-server "255.255.255.255"
   fi
 fi
 
-# Handle Server search list entries
 if [ -n "${CM_REMOTE_SERVER}" ];
 then
-
   # store IFS so we can restore it later
   old_IFS=$IFS
   IFS=","
   for entry in $CM_REMOTE_SERVER;
   do
-    if ! cmu --list-server | grep -q "${entry}" ;
+    if ! cmu --show-serversearchlist | grep -q "${entry}" ;
     then
       start_cm_if_needed
       cmu --add-server "${entry}"
@@ -122,7 +123,6 @@ then
   done
   IFS=${old_IFS}
 fi
-
 
 # Handle license file import
 if [ -n "${CM_LICENSE_FILE}" ];
@@ -173,4 +173,4 @@ rm -f "${HOME}/.cm_init_lock"
 
 set -- "${CODEMETER_CMD[@]}" "$@"
 ## replace the current bash process with CodeMeterLin proc
-exec "$@"
+exec gosu codemeter-backend-classic "$@"
