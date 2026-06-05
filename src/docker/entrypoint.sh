@@ -51,7 +51,7 @@ chown -R codemeter-backend-classic:codemeter-backend-classic /etc/wibu/CodeMeter
 touch "${HOME}/.cm_init_lock"
 
 set +x
-CODEMETER_CMD=('/usr/sbin/CodeMeterLin' "-v")
+CODEMETER_CMD=('gosu' 'codemeter-backend-classic' '/usr/sbin/CodeMeterLin' "-v")
 
 # Enable network server if needed
 if [[ "${CM_NETWORK_SERVER,,}" == "on" ]];
@@ -173,4 +173,4 @@ rm -f "${HOME}/.cm_init_lock"
 
 set -- "${CODEMETER_CMD[@]}" "$@"
 ## replace the current bash process with CodeMeterLin proc
-exec gosu codemeter-backend-classic "$@"
+exec "$@"
