@@ -1,0 +1,157 @@
+# Default values for codemeter.
+# This is a YAML-formatted file.
+# Declare variables to be passed into your templates.
+
+# This sets the container image more information can be found here: https://kubernetes.io/docs/concepts/containers/images/
+image:
+  repository: docker.io/wibusystems/codemeter
+  # This sets the pull policy for images.
+  pullPolicy: IfNotPresent
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: ""
+
+# This is for the secrets for pulling an image from a private repository more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/pull-image-private-registry/
+imagePullSecrets: []
+# This is to override the chart name.
+nameOverride: ""
+fullnameOverride: ""
+
+# This is for setting Kubernetes Annotations to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/annotations/
+podAnnotations: {}
+# This is for setting Kubernetes Labels to a Pod.
+# For more information checkout: https://kubernetes.io/docs/concepts/overview/working-with-objects/labels/
+podLabels: {}
+
+podSecurityContext: {}
+# Example:
+#   - fsGroup: 2000
+
+securityContext: {}
+# Example:
+#   capabilities:
+#     drop:
+#     - ALL
+#   readOnlyRootFilesystem: true
+#   runAsNonRoot: true
+#   runAsUser: 1000
+
+# This is for setting up a service more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/
+service:
+  # This sets the ports more information can be found here: https://kubernetes.io/docs/concepts/services-networking/service/#field-spec-ports
+  # Note that this helm chart only exposes a ClusterIP service. If you want to expose the CodeMeter service outside your cluster, setup a
+  # Service of type LoadBalancer or NodePort manually.
+  port: 22350
+
+resources: {}
+# Example for a small deployment:
+#   requests:
+#     cpu: 100m
+#     memory: 128Mi
+#   limits:
+#     cpu: 250m
+#     memory: 512Mi
+
+# This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
+livenessProbe:
+  exec:
+    command: [/bin/bash, /healthcheck.sh]
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 6
+readinessProbe:
+  exec:
+    command: [/bin/bash, /healthcheck.sh]
+  initialDelaySeconds: 10
+  periodSeconds: 10
+  failureThreshold: 6
+
+# Additional environment varibles
+env: []
+# Example:
+#   - name: ENV_VAR_NAME
+#     value: ENV_VAR_VALUE
+
+# Additional environment varibles
+envFrom: []
+# Example:
+#   - configMapRef:
+#       name: env-vars
+
+# Additional volumes on the output Deployment definition.
+volumes: []
+# Example:
+#   - name: foo
+#     secret:
+#       secretName: mysecret
+#       optional: false
+
+# Additional volumeMounts on the output Deployment definition.
+volumeMounts: []
+# Example:
+#   - name: foo
+#     mountPath: "/etc/foo"
+#     readOnly: true
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+config:
+  # Whether or not to log the bootstrap process.
+  logBootstrap: null
+
+  # Wether to use broadcast remote servers
+  useBroadcastRemoteServers: null
+
+  # Whether to start CodeMeter as a network server.
+  networkServer: null
+
+  # An optional CmFirm.wbc file
+  cmFirmWbc: {}
+  # Example:
+  #   secretName: codemeter-cmfirm-wbc
+  #   secretKey: CmFirm.wbc
+
+  # Add the given Address to the Server Search List.
+  remoteServer: []
+  # Example:
+  #   - 1.2.3.4
+  #   - remote-license-server.example.lan
+
+  # Additional secrets to mount that should be imported by codemeter as licenses.
+  # Use kubectl to import license files as kubernetes secrets:
+  #
+  #   kubectl create secret generic foo --from-file License.WibuCmRaU
+  #
+  licenseFile: []
+  # Example:
+  #   - secretName: foo
+  #     secretKey: License.WibuCmRaU
+
+  # Additional secrets to mount that should be imported by codemeter as cloud credentials.
+  # This option is not compatible with config.licenseFile, config.remoteServer and config.useBroadcastRemoteServers.
+  # Use kubectl to import cloud credentials as kubernetes secrets:
+  #
+  #   kubectl create secret generic foo --from-file CmCloud.wbc
+  #
+  cmCloudCredentials: []
+  # Example:
+  #   - secretName: foo
+  #     secretKey: CmCloud.wbc
+
+  # CodeMeter's /etc/wibu/CodeMeter/Server.ini file.
+  # Changes to this file in the running container are not synchronized back to the secret.
+  serverIni: |
+    [General]
+    Logging=1
+    LogPath=/tmp
+    LogLicenseTrackingPath=/tmp
+    EnabledContainerTypes=10
+
+    [Backup]
+    UpdateCertifiedTime=0
+    Interval=0
+    Path=/tmp
