@@ -56,9 +56,9 @@ VOLUME [ "/etc/wibu/CodeMeter" ]
 
 RUN <<EOF
 #!/bin/bash -ex
-apt update
-apt install -y locales gosu
-rm -rf /var/lib/apt/lists/*
+apt install --update --no-install-recommends -y locales
+apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
+apt dist-clean
 
 # since we don't have the installer this needs to be created manually
 mkdir -p /var/lib/CodeMeter/CmAct

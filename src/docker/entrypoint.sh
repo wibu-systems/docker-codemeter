@@ -20,6 +20,8 @@ CM_NETWORK_SERVER=${CM_NETWORK_SERVER:-off}
 
 CM_LOG_BOOTSTRAP=${CM_LOG_BOOTSTRAP:-off}
 
+CODEMETER_CMD=('setpriv' '--reuid=codemeter-backend-classic' '--regid=codemeter-backend-classic' '--init-groups' '--inh-caps=-all' '--no-new-privs' '/usr/sbin/CodeMeterLin' "-v")
+
 start_cm_if_needed(){
   if cmu -l | grep -q 'not running';
   then
@@ -27,10 +29,10 @@ start_cm_if_needed(){
 
     if [[ "${CM_LOG_BOOTSTRAP,,}" == "on" ]];
     then
-      gosu codemeter-backend-classic /usr/sbin/CodeMeterLin -v &
+      "${CODEMETER_CMD[@]}" &
     else
       # Since we don't have the silent fork mode anymore, push it all to /dev/null
-      gosu codemeter-backend-classic /usr/sbin/CodeMeterLin -v &>/dev/null &
+      "${CODEMETER_CMD[@]}" &>/dev/null &
     fi
 
     # We don't have Systemd's notify ability here, so just sleep while cm is starting up
@@ -51,7 +53,7 @@ chown -R codemeter-backend-classic:codemeter-backend-classic /etc/wibu/CodeMeter
 touch "${HOME}/.cm_init_lock"
 
 set +x
-CODEMETER_CMD=('gosu' 'codemeter-backend-classic' '/usr/sbin/CodeMeterLin' "-v")
+
 
 # Enable network server if needed
 if [[ "${CM_NETWORK_SERVER,,}" == "on" ]];
