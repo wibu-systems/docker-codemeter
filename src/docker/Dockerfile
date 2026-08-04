@@ -3,7 +3,7 @@
 FROM --platform=linux/$TARGETARCH debian:stable-slim AS prepare
 
 ARG TARGETARCH
-ARG CODEMETER_VERSION=9.0.8031.500
+ARG CODEMETER_VERSION=9.10.8166.500
 ADD codemeter-lite_${CODEMETER_VERSION}_${TARGETARCH}.deb /cmlite.deb
 
 RUN set -eux; `
@@ -11,8 +11,8 @@ RUN set -eux; `
 
 FROM --platform=linux/$TARGETARCH debian:stable-slim
 ARG TARGETARCH
-ARG CODEMETER_VERSION=9.0.8031.500
-ARG CM_IMAGE_VERSION=2.0.0
+ARG CODEMETER_VERSION=9.10.8166.500
+ARG CM_IMAGE_VERSION=2.1.0
 
 LABEL `
     org.opencontainers.image.url="https://github.com/wibu-systems/docker-codemeter" `
