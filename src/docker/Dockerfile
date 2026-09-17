@@ -51,12 +51,17 @@ COPY --chmod=755 entrypoint.sh /entrypoint.sh
 COPY --chmod=755 healthcheck.sh /healthcheck.sh
 COPY Server.ini /etc/wibu/CodeMeter/Server.ini
 
+# Those files are optional
+COPY --chmod=755 smartbind-entrypoint.sh /smartbind-entrypoint.sh
+COPY --chmod=755 docker-proxy-filter.sh /docker-proxy-filter.sh
+
 # declare volume first
 VOLUME [ "/etc/wibu/CodeMeter" ]
 
 RUN <<EOF
 #!/bin/bash -ex
-apt install --update --no-install-recommends -y locales
+apt install --update --no-install-recommends -y locales socat
+apt upgrade -y
 apt purge -y --auto-remove -o APT::AutoRemove::RecommendsImportant=false
 apt dist-clean
 
@@ -74,7 +79,7 @@ chown -R codemeter-backend-classic:codemeter-backend-classic /var/lib/CodeMeter/
 chown -R codemeter-backend-classic:codemeter-backend-classic /var/lib/CodeMeter/CmCloud
 chown -R codemeter-backend-classic:codemeter-backend-classic /etc/wibu/CodeMeter/
 
-#
+# Setup permissions for entrypoints and scripts
 chown -R codemeter-backend-classic:codemeter-backend-classic /healthcheck.sh
 chown -R codemeter-backend-classic:codemeter-backend-classic /entrypoint.sh
 
